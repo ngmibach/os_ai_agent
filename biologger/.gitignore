@@ -5,6 +5,9 @@
 *.war
 *.ear
 
+*.png
+*.csv
+
 .classpath
 .project
 .DS_Store
