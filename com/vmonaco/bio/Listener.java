@@ -19,6 +19,10 @@ import com.vmonaco.bio.events.BioMotionEvent;
 import com.vmonaco.bio.events.BioMotionTrackEvent;
 import com.vmonaco.bio.events.BioWheelEvent;
 
+import java.io.File;
+import java.io.IOException;
+import javax.imageio.ImageIO;
+
 public class Listener implements NativeKeyListener, NativeMouseWheelListener, NativeMouseInputListener {
 	private static final int CAPTURE_DELTA_X = 100;
 	private static final int CAPTURE_DELTA_Y = 100;
@@ -31,13 +35,15 @@ public class Listener implements NativeKeyListener, NativeMouseWheelListener, Na
 	private long mMotionThreshold;
 	private int mPrevX;
 	private int mPrevY;
+	private String mOutDir;
 
-	public Listener(Buffer buffer, long motionThreshold) {
+	public Listener(Buffer buffer, long motionThreshold, String outDir) {
 		mBuffer = buffer;
 		mActiveKeys = new HashMap<Integer, BioKeystrokeEvent>();
 		mActiveButtons = new HashMap<Integer, BioClickEvent>();
 		mActiveMotionTrack = null;
 		mMotionThreshold = motionThreshold;
+		mOutDir = outDir;
 	}
 
 	@Override
@@ -146,6 +152,12 @@ public class Listener implements NativeKeyListener, NativeMouseWheelListener, Na
 				CAPTURE_DELTA_X * 2, CAPTURE_DELTA_Y * 2);
 		bioEvent.image = Utility.screenCapture(capture);
 
+		bioEvent.image = Utility.drawClickIndicator(
+			bioEvent.image,
+			CAPTURE_DELTA_X,
+			CAPTURE_DELTA_Y
+		);
+
 		mActiveButtons.put(event.getButton(), bioEvent);
 		BioLogger.LOGGER.log(Level.INFO, "mousedown," + Utility.csvString(bioEvent.values()));
 	}
@@ -162,6 +174,44 @@ public class Listener implements NativeKeyListener, NativeMouseWheelListener, Na
 		bioEvent.release_time = now;
 		bioEvent.release_x = event.getX();
 		bioEvent.release_y = event.getY();
+
+		File imageDir = new File(mOutDir, "mouse_click_capture");
+		if (!imageDir.exists()) {
+			imageDir.mkdirs();
+		}
+
+		String buttonName;
+		switch (bioEvent.button_code) {
+			case NativeMouseEvent.BUTTON1:
+				buttonName = "left";
+				break;
+			case NativeMouseEvent.BUTTON2:
+				buttonName = "middle";
+				break;
+			case NativeMouseEvent.BUTTON3:
+				buttonName = "right";
+				break;
+			default:
+				buttonName = "button" + bioEvent.button_code;
+		}
+
+		String timestamp = Utility.formatUtc(bioEvent.press_time)
+                          .replace(" ", "_")
+                          .replace(":", "-");
+
+		String filename = "click_" + timestamp + "_" + buttonName + ".png";
+		String relativePath = "mouse_click_capture/" + filename;
+		String fullPath = imageDir.getAbsolutePath() + "/" + filename;
+
+		try {
+			ImageIO.write(bioEvent.image, "png", new File(fullPath));
+			bioEvent.image_filename = relativePath;
+		} catch (IOException e) {
+			BioLogger.LOGGER.severe(Utility.createCrashReport(e));
+		}
+
+		bioEvent.image = null;
+		bioEvent.image_filename = relativePath;
 
 		mBuffer.addEvent(bioEvent);
 		BioLogger.LOGGER.log(Level.INFO, "mouseup," + Utility.csvString(bioEvent.values()));

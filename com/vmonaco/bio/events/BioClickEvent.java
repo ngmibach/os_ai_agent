@@ -14,8 +14,11 @@ public class BioClickEvent implements BioEvent {
 
 	public static final String event_type = "mouseclick";
 
-	public static final String[] HEADER = { "press_time", "release_time", "button_code", "press_x", "press_y",
-			"release_x", "release_y", "modifier_code", "modifier_name", "image" };
+	public static final String[] HEADER = {
+        "press_time_utc", "release_time_utc", "button_code",
+        "press_x", "press_y", "release_x", "release_y",
+        "modifier_code", "modifier_name", "image_filename"
+    };
 
 	public long press_time;
 	public long release_time;
@@ -27,6 +30,7 @@ public class BioClickEvent implements BioEvent {
 	public int modifier_code;
 	public String modifier_name;
 	public BufferedImage image;
+	public String image_filename = "";
 
 	@Override
 	public String[] header() {
@@ -35,15 +39,19 @@ public class BioClickEvent implements BioEvent {
 
 	@Override
 	public String[] values() {
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		try {
-			ImageIO.write(image, "png", out);
-		} catch (IOException e) {
-			BioLogger.LOGGER.severe(Utility.createCrashReport(e));
-		}
-		return new String[] { "" + press_time, "" + release_time, "" + button_code, "" + press_x, "" + press_y,
-				"" + release_x, "" + release_y, "" + modifier_code, modifier_name,
-				new String(Base64.getEncoder().encode(out.toByteArray())) };
+		String pressUtc  = Utility.formatUtc(press_time);
+		String releaseUtc = release_time == 0 ? "" : Utility.formatUtc(release_time);
+
+		return new String[] {
+			pressUtc,
+			releaseUtc,
+			"" + button_code,
+			"" + press_x, "" + press_y,
+			"" + release_x, "" + release_y,
+			"" + modifier_code,
+			modifier_name,
+			image_filename
+		};
 	}
 
 	@Override

@@ -6,8 +6,10 @@ public class BioWheelEvent implements BioEvent {
 
 	public static final String event_type = "mousewheel";
 
-	public static final String[] HEADER = { "time", "rotation", "amount", "type", "x", "y", "modifier_code",
-			"modifier_name" };
+	public static final String[] HEADER = {
+		"time_utc", "rotation", "amount", "type",
+		"x", "y", "modifier_code", "modifier_name"
+	};
 
 	public long time;
 	public int rotation;
@@ -25,8 +27,15 @@ public class BioWheelEvent implements BioEvent {
 
 	@Override
 	public String[] values() {
-		return new String[] { "" + time, "" + rotation, "" + amount, "" + type, "" + x, "" + y, "" + modifier_code,
-				modifier_name };
+		return new String[] {
+			Utility.formatUtc(time),
+			"" + rotation,
+			"" + amount,
+			"" + type,
+			"" + x, "" + y,
+			"" + modifier_code,
+			modifier_name
+		};
 	}
 
 	@Override

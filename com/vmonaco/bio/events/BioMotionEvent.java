@@ -6,7 +6,9 @@ public class BioMotionEvent implements BioEvent {
 
 	public static final String event_type = "mousemotion";
 
-	public static final String[] HEADER = { "time", "x", "y", "modifier_code", "modifier_name", "dragged" };
+	public static final String[] HEADER = {
+		"time_utc", "x", "y", "modifier_code", "modifier_name", "dragged"
+	};
 
 	public long time;
 	public int x;
@@ -22,7 +24,13 @@ public class BioMotionEvent implements BioEvent {
 
 	@Override
 	public String[] values() {
-		return new String[] { "" + time, "" + x, "" + y, "" + modifier_code, modifier_name, "" + dragged };
+		return new String[] {
+			Utility.formatUtc(time),
+			"" + x, "" + y,
+			"" + modifier_code,
+			modifier_name,
+			"" + dragged
+		};
 	}
 
 	@Override

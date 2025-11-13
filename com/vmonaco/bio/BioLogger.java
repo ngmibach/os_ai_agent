@@ -43,7 +43,7 @@ public class BioLogger {
 
 		mFileCSV = new ConsumerCSV(classMap, outDir);
 		mBuffer = new Buffer(mFileCSV);
-		mListener = new Listener(mBuffer, motionThreshold);
+		mListener = new Listener(mBuffer, motionThreshold, mOutDir);
 
 		if (showWindow) {
 			mGui = new GUI(this, outDir);

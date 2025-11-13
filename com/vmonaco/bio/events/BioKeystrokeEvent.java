@@ -5,9 +5,10 @@ import com.vmonaco.bio.Utility;
 public class BioKeystrokeEvent implements BioEvent {
 
 	public static final String event_type = "keystroke";
-	public static final String[] HEADER = { "press_time", "release_time", "key_code", "key_name", "modifier_code",
-			"modifier_name", "location" };
-
+	public static final String[] HEADER = {
+		"press_time_utc", "release_time_utc", "key_code", "key_name",
+		"modifier_code", "modifier_name", "location"
+	};
 	public long press_time;
 	public long release_time;
 	public int key_code;
@@ -23,8 +24,18 @@ public class BioKeystrokeEvent implements BioEvent {
 
 	@Override
 	public String[] values() {
-		return new String[] { "" + press_time, "" + release_time, "" + key_code, key_string, "" + modifier_code,
-				modifier_name, "" + key_location };
+		String press  = Utility.formatUtc(press_time);
+		String release = release_time == 0 ? "" : Utility.formatUtc(release_time);
+
+		return new String[] {
+			press,
+			release,
+			"" + key_code,
+			key_string,
+			"" + modifier_code,
+			modifier_name,
+			"" + key_location
+		};
 	}
 
 	@Override

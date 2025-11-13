@@ -11,6 +11,11 @@ import java.awt.image.BufferedImage;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.time.format.DateTimeFormatter;
+import java.time.ZoneOffset;
+import java.time.Instant;
 
 public class Utility {
 
@@ -99,4 +104,28 @@ public class Utility {
 		String stacktrace = result.toString();
 		return header + "\nStacktrace:\n" + stacktrace;
 	}
+
+	public static BufferedImage drawClickIndicator(BufferedImage img, int centerX, int centerY) {
+		BufferedImage copy = new BufferedImage(img.getWidth(), img.getHeight(), img.getType());
+		Graphics2D g2d = copy.createGraphics();
+		g2d.drawImage(img, 0, 0, null);
+
+		int radius = 8;
+		g2d.setColor(Color.RED);
+		g2d.setStroke(new BasicStroke(3));
+		g2d.drawOval(centerX - radius, centerY - radius, radius * 2, radius * 2);
+		g2d.fillOval(centerX - radius + 3, centerY - radius + 3, radius * 2 - 6, radius * 2 - 6);
+
+		g2d.dispose();
+		return copy;
+	}
+
+	public static final DateTimeFormatter UTC_FORMAT =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS 'UTC'")
+                             .withZone(ZoneOffset.UTC);
+
+    public static String formatUtc(long millis) {
+        return Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC)
+                      .format(UTC_FORMAT);
+    }
 }
